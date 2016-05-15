@@ -1,0 +1,40 @@
+---
+http_interactions:
+- request:
+    method: post
+    uri: https://austin.bcycle.com/api/Authenticate
+    body:
+      encoding: UTF-8
+      string: Password=valid&UserName=not
+    headers:
+      User-Agent:
+      - Typhoeus - https://github.com/typhoeus/typhoeus
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Cache-Control:
+      - no-cache
+      Pragma:
+      - no-cache
+      Content-Type:
+      - application/json; charset=utf-8
+      Expires:
+      - "-1"
+      Server:
+      - Microsoft-IIS/8.5
+      X-Aspnet-Version:
+      - 4.0.30319
+      X-Frame-Options:
+      - SAMEORIGIN
+      Date:
+      - Sat, 14 May 2016 23:33:30 GMT
+      Content-Length:
+      - '65'
+    body:
+      encoding: UTF-8
+      string: '{"Message":"Invalid UserName/Password","SuccessRedirectUrl":null}'
+    http_version: 
+  recorded_at: Sat, 14 May 2016 23:33:30 GMT
+recorded_with: VCR 3.0.1
