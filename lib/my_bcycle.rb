@@ -6,7 +6,7 @@ module MyBcycle
 
   class User
     attr_reader :username, :password, :city
-    def initialize city: :austin, username:, password:
+    def initialize(city: :austin, username:, password:)
       @city = city
       @username = username
       @password = password
@@ -15,12 +15,12 @@ module MyBcycle
     def statistics_for(time)
       return unless session_token
       response = Typhoeus.get(
-        'https://portal-den.bcycle.com/1/user/trips',
+        "https://portal-den.bcycle.com/1/user/trips",
         params: {
           month: time.month,
-          year: time.year
+          year: time.year,
         },
-        headers: {'Bcycle-Session-Token': session_token },
+        headers: { 'Bcycle-Session-Token': session_token },
         accept_encoding: "gzip"
       )
       unless response.code == 200
@@ -34,17 +34,18 @@ module MyBcycle
           duration:  entry["duration"],
           money_saved:  entry["moneySaved"],
         }
-        [ k, v ]
+        [k, v]
       end.to_h
     end
 
     private
+
     def session_token
       @session_token ||= retrieve_token
     end
 
     def retrieve_token
-      cookiefile = Tempfile.new('bcycle-cookie')
+      cookiefile = Tempfile.new("bcycle-cookie")
       cookie_path = cookiefile.path
       begin
         login_req = do_request! Typhoeus::Request.new(
@@ -54,14 +55,14 @@ module MyBcycle
           cookiejar: cookie_path,
           body: login_params
         )
-        if login_req.body.match(/Invalid UserName/i)
+        if login_req.body =~ /Invalid UserName/i
           raise InvalidCredentials
         end
 
         token_req = do_request! Typhoeus::Request.new(
           token_url,
           cookiefile: cookie_path,
-          cookiejar: cookie_path,
+          cookiejar: cookie_path
         )
         token_req.body[/\A"([a-z0-9\-]{36})"/i, 1]
       end
@@ -70,7 +71,7 @@ module MyBcycle
       cookiefile.unlink
     end
 
-    def do_request! request
+    def do_request!(request)
       request.on_complete do |response|
         next if response.success?
 
@@ -79,25 +80,25 @@ module MyBcycle
         elsif response.code == 0
           raise CommunicationProblem, response.return_message.to_s
         else
-          raise CommunicationProblem, "Got error code #{response.code.to_s}"
+          raise CommunicationProblem, "Got error code #{response.code}"
         end
       end
       request.run
     end
 
-      def login_url
-        "https://#{city}.bcycle.com/api/Authenticate"
-      end
+    def login_url
+      "https://#{city}.bcycle.com/api/Authenticate"
+    end
 
-      def token_url
-        "https://#{city}.bcycle.com/api/sessiontoken/get"
-      end
+    def token_url
+      "https://#{city}.bcycle.com/api/sessiontoken/get"
+    end
 
-      def login_params
-        {
-          UserName: username,
-          Password: password
-        }
-      end
+    def login_params
+      {
+        UserName: username,
+        Password: password,
+      }
+    end
     end
 end
