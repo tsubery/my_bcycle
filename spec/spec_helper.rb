@@ -3,8 +3,8 @@ require "my_bcycle"
 require "webmock/rspec"
 require "vcr"
 
-VCR.config do |c|
-  c.stub_with :webmock
+VCR.configure do |c|
+  c.hook_into :webmock
   c.cassette_library_dir = "spec/cassettes"
 end
 

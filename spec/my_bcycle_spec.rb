@@ -15,7 +15,7 @@ describe MyBcycle do
     it "can fetch statistics" do
       VCR.use_cassette("happy_path", record: :once) do
         stats = valid_user.statistics_for(Time.parse("2016-05-01"))
-        expect(stats).to eq(Time.parse("2001-01-01)01:01:01.01Z") => {
+        expect(stats).to eq(Time.parse("2001-01-01 01:01:01.01Z") => {
                               miles: 999.80,
                               duration: 22,
                               money_saved: 1.5,
