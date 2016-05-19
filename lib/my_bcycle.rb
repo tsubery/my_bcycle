@@ -15,7 +15,7 @@ module MyBcycle
 
     def statistics_for(time)
       return unless session_token
-      response = Typhoeus.get(
+      response = do_request! Typhoeus::Request.new(
         "https://portal-den.bcycle.com/1/user/trips",
         params: {
           month: time.month,
@@ -24,11 +24,13 @@ module MyBcycle
         headers: { 'Bcycle-Session-Token': session_token },
         accept_encoding: "gzip"
       )
-      unless response.code == 200
-        raise "todo"
-      end
-      month_data = JSON.parse(response.body)
-      month_data.map do |entry|
+      parse_statistics(response.body)
+    end
+
+    private
+
+    def parse_statistics(body)
+      JSON.parse(body).map do |entry|
         k = Time.parse entry["checkOutDate"]
         v = {
           miles:  entry["miles"],
@@ -39,8 +41,6 @@ module MyBcycle
       end.to_h
     end
 
-    private
-
     def session_token
       @session_token ||= retrieve_token
     end
@@ -49,27 +49,33 @@ module MyBcycle
       cookiefile = Tempfile.new("bcycle-cookie")
       cookie_path = cookiefile.path
       begin
-        login_req = do_request! Typhoeus::Request.new(
-          login_url,
-          method: :post,
-          cookiefile: cookie_path,
-          cookiejar: cookie_path,
-          body: login_params
-        )
-        if login_req.body =~ /Invalid UserName/i
-          raise InvalidCredentials
-        end
-
-        token_req = do_request! Typhoeus::Request.new(
-          token_url,
-          cookiefile: cookie_path,
-          cookiejar: cookie_path
-        )
-        token_req.body[/\A"([a-z0-9\-]{36})"/i, 1]
+        login_request!(cookie_path)
+        token_request!(cookie_path).body[/\A"([a-z0-9\-]{36})"/i, 1]
       end
     ensure
       cookiefile.close
       cookiefile.unlink
+    end
+
+    def login_request!(cookie_path)
+      login_req = do_request! Typhoeus::Request.new(
+        login_url,
+        method: :post,
+        cookiefile: cookie_path,
+        cookiejar: cookie_path,
+        body: login_params
+      )
+      if login_req.body =~ /Invalid UserName/i
+        raise InvalidCredentials
+      end
+    end
+
+    def token_request!(cookie_path)
+      do_request! Typhoeus::Request.new(
+        token_url,
+        cookiefile: cookie_path,
+        cookiejar: cookie_path
+      )
     end
 
     def do_request!(request)
@@ -101,5 +107,5 @@ module MyBcycle
         Password: password,
       }
     end
-    end
+  end
 end

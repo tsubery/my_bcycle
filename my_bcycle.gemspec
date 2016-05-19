@@ -10,11 +10,13 @@ Gem::Specification.new do |spec|
   spec.email         = ["gal.tsubery@gmail.com"]
 
   spec.summary       = "Wrapper of bcycle personal usage statistics API"
-  spec.description   = "This gem retrieves bcycle personal usage statistics from their website, including total miles, duration and money saved."
+  spec.description   = "This gem retrieves bcycle personal usage statistics"\
+  " from their website, including total miles, duration and money saved."
   spec.homepage      = "http://github.com/tsubery/my_bcycle/"
   spec.license       = "MIT"
 
-  spec.files         = `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(test|spec|features)/}) }
+  spec.files         = `git ls-files -z`
+                       .split("\x0").reject { |f| f.match(%r{^(test|spec|features)/}) }
   spec.bindir        = "exe"
   spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
   spec.require_paths = ["lib"]
