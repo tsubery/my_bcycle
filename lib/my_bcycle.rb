@@ -1,4 +1,5 @@
 require "my_bcycle/version"
+require "typhoeus"
 
 module MyBcycle
   InvalidCredentials = Class.new(StandardError)
